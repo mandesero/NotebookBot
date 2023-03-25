@@ -1,0 +1,32 @@
+name: Pylint
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --dev
+      - name: Run Pylint
+        run: |
+          pylint --output-format=parseable *.py > pylint_report.txt || pylint-exit $?
+      - name: Check Pylint result
+        run: |
+          grep -q "Your code has been rated at 10.00/10" pylint_report.txt && echo "Pylint Check: Passed" > pylint_result.txt || echo "Pylint Check: Failed" > pylint_result.txt
+      - name: Update README
+        uses: peaceiris/actions-readme@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filename: README.md
+          template: '### Pylint Check\n${{ readFile("pylint_result.txt") }}'
