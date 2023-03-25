@@ -25,8 +25,11 @@ jobs:
         run: |
           grep -q "Your code has been rated at 10.00/10" pylint_report.txt && echo "Pylint Check: Passed" > pylint_result.txt || echo "Pylint Check: Failed" > pylint_result.txt
       - name: Update README
-        uses: peaceiris/actions-readme@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          filename: README.md
-          template: '### Pylint Check\n${{ readFile("pylint_result.txt") }}'
+        run: |
+          echo '### Pylint Check' > README.md
+          if grep -q "Passed" pylint_result.txt; then \
+            echo ':white_check_mark: Passed' >> README.md; \
+          else \
+            echo ':x: Failed' >> README.md; \
+          fi
+        if: always()
