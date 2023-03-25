@@ -9,16 +9,15 @@ jobs:
   pylint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.5.2 # Обновление до версии 2.5.2
+      - uses: actions/checkout@v2 # Используем последнюю версию
       - name: Set up Python 3.x
-        uses: actions/setup-python@v2.5.2 # Обновление до версии 2.5.2
+        uses: actions/setup-python@v2 # Используем последнюю версию
         with:
           python-version: 3.x
       - name: Install dependencies
         run: |
           pip install pipenv
           pipenv install --dev
-          pip install pylint
       - name: Run Pylint
         run: |
           pylint --output-format=parseable *.py > pylint_report.txt || pylint-exit $?
