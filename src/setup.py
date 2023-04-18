@@ -1,6 +1,10 @@
 from aiogram.utils import executor
-from src.bot import bot, dp
-from src.config import ADMIN_ID
+from bot import bot, dp
+from config import ADMIN_ID
+
+from handlers.client import register_handlers
+
+register_handlers(dp)
 
 
 async def start_admin(_):
