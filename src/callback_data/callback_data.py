@@ -1,3 +1,5 @@
-from aiogram.utils.callback_data import CallbackData
+from aiogram.filters.callback_data import CallbackData
 
-lang_callback = CallbackData("lang_kb", "lang")
+
+class MenuCallbackData(CallbackData, prefix='menu'):
+    text: str

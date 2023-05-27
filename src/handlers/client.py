@@ -1,11 +1,13 @@
 from aiogram import types
 from aiogram.filters import CommandObject
 
-from keyboards.client_kb import lang_kb
+from keyboards.client_kb import lang_markup, menu_markup
+from callback_data.callback_data import MenuCallbackData
 
 bot_commands = {
     ("start", "start messaging with bot",),
-    ("help", "get some help",)
+    ("help", "get some help",),
+    ("menu", "return menu",)
 }
 
 
@@ -18,7 +20,7 @@ async def command_start(message: types.Message) -> None:
     """
     await message.answer(
         "Hello",
-        reply_markup=lang_kb.as_markup(
+        reply_markup=lang_markup.as_markup(
             resize_keyboard=True,
             one_time_keyboard=True
         )
@@ -51,3 +53,34 @@ async def choose_lang(message: types.Message) -> None:
     :return: None
     """
     await message.answer(text=f"You choose {message.text}")
+
+
+async def get_menu(message: types.Message):
+    await message.answer(
+        text='munu',
+        reply_markup=menu_markup.as_markup()
+    )
+
+
+async def menu_callback_filter(call: types.CallbackQuery, callback_data: MenuCallbackData):
+    # await call.message.answer(text="use choose add new file")
+    if callback_data.text == "new":
+        await add_new_file(call)
+
+    if callback_data.text == "change":
+        await change_file(call)
+
+    if callback_data.text == "my":
+        await show_user_files(call)
+
+
+async def add_new_file(call: types.CallbackQuery):
+    await call.message.answer(text="Adding")
+
+
+async def change_file(call: types.CallbackQuery):
+    await call.message.answer(text="Changing")
+
+
+async def show_user_files(call: types.CallbackQuery):
+    await call.message.answer(text="Showing")
