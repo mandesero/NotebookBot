@@ -1,6 +1,12 @@
 from aiogram import types
+from aiogram.filters import CommandObject
 
 from keyboards.client_kb import lang_kb
+
+bot_commands = {
+    ("start", "start messaging with bot",),
+    ("help", "get some help",)
+}
 
 
 async def command_start(message: types.Message) -> None:
@@ -19,14 +25,22 @@ async def command_start(message: types.Message) -> None:
     )
 
 
-async def command_help(message: types.Message) -> None:
+async def command_help(message: types.Message, command: CommandObject) -> types.Message:
     """
     Command for get some help.
 
     :param message: command "/help"
-    :return: None
+    :return: description of the command
     """
-    await message.answer(text="Help")
+    for cmd in bot_commands:
+        if cmd[0] == command.args:
+            return await message.answer(
+                text=f"{cmd[0]} - {cmd[1]}"
+            )
+
+    return await message.answer(
+        text=f"Command {command.args} not found. \n\n use /help <command>"
+    )
 
 
 async def choose_lang(message: types.Message) -> None:
