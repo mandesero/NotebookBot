@@ -1,14 +1,40 @@
 from aiogram import types
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.methods.get_file import GetFile
 from aiogram.filters import CommandObject
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from time import time
+
+from config import BOT_TOKEN
 
 from keyboards.client_kb import lang_markup, menu_markup
 from callback_data.callback_data import MenuCallbackData
+import aiohttp
+
+
+async def download_file(url, destination_path, file_name):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            data = await response.read()
+            with open(f"{destination_path}/{file_name}", "wb") as f:
+                f.write(data)
+
 
 bot_commands = {
     ("start", "start messaging with bot",),
     ("help", "get some help",),
     ("menu", "return menu",)
 }
+
+
+class AddingStates(StatesGroup):
+    '''
+        Adding states
+    '''
+    waiting_for_name = State()
+    waiting_for_file = State()
+    creating_notebook = State()
 
 
 async def command_start(message: types.Message) -> None:
@@ -55,32 +81,83 @@ async def choose_lang(message: types.Message) -> None:
     await message.answer(text=f"You choose {message.text}")
 
 
-async def get_menu(message: types.Message):
+async def get_menu(message: types.Message) -> None:
+    menu_markup = ReplyKeyboardBuilder()
+    menu_markup.button(text="Add new file", callback_data="add_new_file")
+    menu_markup.button(text="Change file", callback_data="change_file")
+    menu_markup.button(text="Show my files", callback_data="show_files")
+    menu_markup.adjust(1)
     await message.answer(
-        text='munu',
-        reply_markup=menu_markup.as_markup()
+        text='Menu',
+        reply_markup=menu_markup.as_markup(
+            resize_keyboard=True,
+            one_time_keyboard=True
+        )
     )
 
 
-async def menu_callback_filter(call: types.CallbackQuery, callback_data: MenuCallbackData):
-    # await call.message.answer(text="use choose add new file")
-    if callback_data.text == "new":
-        await add_new_file(call)
+async def get_new_file_name(message: types.Message, state: FSMContext) -> None:
+    await state.set_state(AddingStates.waiting_for_name)
 
-    if callback_data.text == "change":
-        await change_file(call)
+    cancel_board = ReplyKeyboardBuilder()
+    cancel_board.button(text="Cancel")
 
-    if callback_data.text == "my":
-        await show_user_files(call)
-
-
-async def add_new_file(call: types.CallbackQuery):
-    await call.message.answer(text="Adding")
-
-
-async def change_file(call: types.CallbackQuery):
-    await call.message.answer(text="Changing")
+    await message.answer(
+        text="Enter name of the notebook",
+        reply_markup=cancel_board.as_markup(
+            resize_keyboard=True,
+            one_time_keyboard=True
+        )
+    )
 
 
-async def show_user_files(call: types.CallbackQuery):
-    await call.message.answer(text="Showing")
+async def add_new_file(message: types.Message, state: FSMContext) -> None:
+    if message.text == "Cancel":
+        await state.clear()
+        return
+
+    await state.update_data(name=message.text)
+    # await state.set_data({"name", message.text})
+    await state.set_state(AddingStates.waiting_for_file)
+
+    cancel_board = ReplyKeyboardBuilder()
+    cancel_board.button(text="Cancel")
+
+    await message.answer(
+        "Upload your files (Write 'done' in the end)",
+        reply_markup=cancel_board.as_markup(
+            resize_keyboard=True,
+            one_time_keyboard=True
+        )
+    )
+
+
+async def get_new_file(message: types.Message, state: FSMContext):
+    if message.text == "Cancel":
+        await state.clear()
+        return
+
+    if message.text:
+        await state.set_state(AddingStates.creating_notebook)
+        return await create_new_notebook(message, state)
+
+    if message.document:
+        file_id = message.document.file_id
+        file_name = f"{message.from_user.id}_{int(time() * 1e8)}.pdf"
+
+    if message.photo:
+        file_id = message.photo[-1].file_id
+        file_name = f"{message.from_user.id}_{int(time() * 1e8)}.jpeg"
+
+    file_info = await GetFile(file_id=file_id)
+    file_path = file_info.file_path
+    url = f'https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}'
+    await download_file(url=url, destination_path='../downloads/', file_name=file_name)
+
+
+async def create_new_notebook(message: types.Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    print(data)
+    await message.answer(
+        text=f"New - {data['name']}"
+    )
