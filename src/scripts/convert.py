@@ -42,6 +42,11 @@ def merge_pdf(path: str) -> None:
             pdf_merger.write(f)
 
 
+def make_notebook(file_name: str, usr_id: int) -> None:
+    # files = [file for file in os.listdir(f'../usr_files/{usr_id}/') if file.startswith(str(usr_id))]
+    # нужно сделать сбор всех файлов из директории usr_id, которые начинаются на usr_id в один пдф и сохранить его с именем file_name
+    pass
+
 inp = input()
 path = input()
 if inp == 'new':

@@ -7,6 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/docs/_build" />
       <excludeFolder url="file://$MODULE_DIR$/docs/_static" />
       <excludeFolder url="file://$MODULE_DIR$/docs/_templates" />
+      <excludeFolder url="file://$MODULE_DIR$/usr_files" />
     </content>
     <orderEntry type="jdk" jdkName="Pipenv (NotebookBot)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

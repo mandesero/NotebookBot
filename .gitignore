@@ -2,3 +2,4 @@
 /docs/_templates
 /docs/_build
 /src/.env
+/usr_files/*
