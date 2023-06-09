@@ -57,6 +57,8 @@ pillow = "*"
 pypdf2 = "*"
 pytest = "*"
 pytest-asyncio = "*"
+doit = "*"
+build = "*"
 
 [dev-packages]
 sphinx = "*"

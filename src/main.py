@@ -70,7 +70,7 @@ class Translator:
                     translator=FluentBundle.from_files(
                         locale="en-US",
                         filenames=[
-                            "src/locales/en.ftl",
+                            f"{__file__[:-8]}/en.ftl",
                         ],
                     ),
                 ),
@@ -79,7 +79,7 @@ class Translator:
                     translator=FluentBundle.from_files(
                         locale="ru-RU",
                         filenames=[
-                            "src/locales/ru.ftl",
+                            f"{__file__[:-8]}/ru.ftl",
                         ],
                     ),
                 ),
@@ -118,7 +118,7 @@ def make_notebook(file_name: str, usr_id: int) -> None:
     :param usr_id:
     :return:
     """
-    path = f"src/usr_files/{usr_id}/"
+    path = f"{__file__[:-8]}/usr_files/{usr_id}/"
     files = [path + file for file in os.listdir(path) if file.startswith(str(usr_id))]
     for f in files:
         if not f.endswith(".pdf"):
@@ -147,7 +147,7 @@ def update_notebook(file_name: str, usr_id: int) -> None:
     :param usr_id:
     :return:
     """
-    path = f"src/usr_files/{usr_id}/"
+    path = f"{__file__[:-8]}/usr_files/{usr_id}/"
     files = [path + file for file in os.listdir(path) if file.startswith(str(usr_id))]
     for f in files:
         if not f.endswith(".pdf"):
@@ -247,11 +247,12 @@ async def command_start(message: types.Message) -> types.Message:
     :return: None
     """
     user_id = message.from_user.id
-    if "usr_files" not in os.listdir("."):
-        os.mkdir("usr_files")
+    print('\n\n\n', __file__[:-8], '\n\n\n')
+    if "usr_files" not in os.listdir(f"{__file__[:-8]}"):
+        os.mkdir(f"{__file__[:-8]}/usr_files")
 
-    if str(user_id) not in os.listdir("src/usr_files/"):
-        os.mkdir(f"src/usr_files/{user_id}")
+    if str(user_id) not in os.listdir(f"{__file__[:-8]}/usr_files/"):
+        os.mkdir(f"{__file__[:-8]}/usr_files/{user_id}")
     usr_lang[user_id] = "en"
 
     lang_markup = ReplyKeyboardBuilder()
@@ -388,7 +389,7 @@ async def get_new_file(message: types.Message, state: FSMContext):
     url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
     await download_file(
         url=url,
-        destination_path=f"src/usr_files/{message.from_user.id}",
+        destination_path=f"{__file__[:-8]}/usr_files/{message.from_user.id}",
         file_name=file_name,
     )
 
@@ -425,7 +426,7 @@ async def show_user_notebooks(
     usr_id = message.from_user.id
     files = [
         file
-        for file in os.listdir(f"src/usr_files/{usr_id}/")
+        for file in os.listdir(f"{__file__[:-8]}/usr_files/{usr_id}/")
         if not file.startswith(str(usr_id))
     ]
     if not files:
@@ -454,10 +455,10 @@ async def send_notebook(callback: types.CallbackQuery, state: FSMContext) -> Non
     :return:
     """
     await state.clear()
-    files = os.listdir(f"src/usr_files/{callback.from_user.id}/")
+    files = os.listdir(f"{__file__[:-8]}/usr_files/{callback.from_user.id}/")
     for file in files:
         if file.startswith(callback.data):
-            file_obj = FSInputFile(f"src/usr_files/{callback.from_user.id}/{file}")
+            file_obj = FSInputFile(f"{__file__[:-8]}/usr_files/{callback.from_user.id}/{file}")
             await SendDocument(chat_id=callback.message.chat.id, document=file_obj)
             break
 
@@ -479,7 +480,7 @@ async def changing_user_notebook(
     usr_id = message.from_user.id
     files = [
         file
-        for file in os.listdir(f"src/usr_files/{usr_id}/")
+        for file in os.listdir(f"{__file__[:-8]}/usr_files/{usr_id}/")
         if not file.startswith(str(usr_id))
     ]
     if not files:
@@ -553,7 +554,7 @@ async def get_files_to_update(message: types.Message, state: FSMContext) -> None
     url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
     await download_file(
         url=url,
-        destination_path=f"src/usr_files/{message.from_user.id}",
+        destination_path=f"{__file__[:-8]}/usr_files/{message.from_user.id}",
         file_name=file_name,
     )
 
