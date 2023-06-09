@@ -80,7 +80,7 @@ class ChangingStates(StatesGroup):
     updating_notebook = State()
 
 
-async def command_start(message: types.Message) -> None:
+async def command_start(message: types.Message) -> types.Message:
     """
     Начало работы с ботом. Выбор локали
 
@@ -97,8 +97,8 @@ async def command_start(message: types.Message) -> None:
     lang_markup.button(text="en", callback_data="en")
     lang_markup.adjust(2)
 
-    await message.answer(
-        "Hello",
+    return await message.answer(
+        text="Hello",
         reply_markup=lang_markup.as_markup(
             resize_keyboard=True, one_time_keyboard=True
         ),
