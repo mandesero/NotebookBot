@@ -1,4 +1,17 @@
 import asyncio
+import logging
+import os
+import dotenv
+
+from aiogram import Dispatcher, Bot
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import BotCommand
+from fluent_compiler.bundle import FluentBundle
+from fluentogram import TranslatorHub, FluentTranslator, TranslatorRunner
+from aiogram import Router, F
+from aiogram.filters import CommandStart, Command
+
+import asyncio
 
 from aiogram import types
 from aiogram.fsm.context import FSMContext
@@ -9,16 +22,165 @@ from aiogram.filters import CommandObject
 from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from time import time
-import os
-from scripts.convert import make_notebook, update_notebook
-
-from config import BOT_TOKEN
 
 import aiohttp
 
-from languages.translator import LocalizedTranslator, Translator
+from typing import Callable, Dict, Any, Awaitable, Union
+
+from aiogram import BaseMiddleware
+from aiogram.types import Message, CallbackQuery
+
+import os
+from PIL import Image
+import PyPDF2
+import contextlib
+
+# ====== Config ======
+dotenv.load_dotenv()
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = os.getenv("ADMIN_ID")
+
+
+# ====================
+
+
+class LocalizedTranslator:
+    translator: TranslatorRunner
+
+    def __init__(self, translator: TranslatorRunner):
+        self.translator = translator
+
+    def get(self, key: str, **kwargs) -> str:
+        return self.translator.get(key, **kwargs)
+
+
+class Translator:
+    t_hub: TranslatorHub
+
+    def __init__(self):
+        self.t_hub = TranslatorHub(
+            locales_map={
+                "en": (
+                    "en",
+                    "ru",
+                ),
+                "ru": ("ru",),
+            },
+            translators=[
+                FluentTranslator(
+                    locale="en",
+                    translator=FluentBundle.from_files(
+                        locale="en-US",
+                        filenames=[
+                            "src/locales/en.ftl",
+                        ],
+                    ),
+                ),
+                FluentTranslator(
+                    locale="ru",
+                    translator=FluentBundle.from_files(
+                        locale="ru-RU",
+                        filenames=[
+                            "src/locales/ru.ftl",
+                        ],
+                    ),
+                ),
+            ],
+            root_locale="ru",
+        )
+
+    def get_translator(self, language: str, *args, **kwargs) -> LocalizedTranslator:
+        return LocalizedTranslator(
+            translator=self.t_hub.get_translator_by_locale(locale=language)
+        )
+
 
 usr_lang = {}
+
+
+# path to file
+def image_to_pdf(path: str) -> None:
+    """
+
+    :param path:
+    :return:
+    """
+    image = Image.open(path)
+    image = image.convert("RGB")
+    if (idx := path.rfind("."), -5) != -1:
+        path = path[:idx]
+    path += ".pdf"
+    image.save(path)
+
+
+def make_notebook(file_name: str, usr_id: int) -> None:
+    """
+
+    :param file_name:
+    :param usr_id:
+    :return:
+    """
+    path = f"src/usr_files/{usr_id}/"
+    files = [path + file for file in os.listdir(path) if file.startswith(str(usr_id))]
+    for f in files:
+        if not f.endswith(".pdf"):
+            image_to_pdf(f)
+            os.remove(f)
+
+    pdf_files_list = [
+        path + file for file in os.listdir(path) if file.startswith(str(usr_id))
+    ]
+
+    with contextlib.ExitStack() as stack:
+        pdf_merger = PyPDF2.PdfMerger()
+        files = [stack.enter_context(open(pdf, "rb")) for pdf in pdf_files_list]
+        for f in files:
+            pdf_merger.append(f)
+        with open(path + file_name + ".pdf", "wb") as f:
+            pdf_merger.write(f)
+    for f in pdf_files_list:
+        os.remove(f)
+
+
+def update_notebook(file_name: str, usr_id: int) -> None:
+    """
+
+    :param file_name:
+    :param usr_id:
+    :return:
+    """
+    path = f"src/usr_files/{usr_id}/"
+    files = [path + file for file in os.listdir(path) if file.startswith(str(usr_id))]
+    for f in files:
+        if not f.endswith(".pdf"):
+            image_to_pdf(f)
+            os.remove(f)
+
+    pdf_files_list = [
+        path + file for file in os.listdir(path) if file.startswith(str(usr_id))
+    ] + [path + file_name + ".pdf"]
+
+    with contextlib.ExitStack() as stack:
+        pdf_merger = PyPDF2.PdfMerger()
+        files = [stack.enter_context(open(pdf, "rb")) for pdf in pdf_files_list]
+        for f in files:
+            pdf_merger.append(f)
+        with open(path + file_name + ".pdf", "wb") as f:
+            pdf_merger.write(f)
+    for f in pdf_files_list:
+        if f != path + file_name + ".pdf":
+            os.remove(f)
+
+
+class Simple_Middleware(BaseMiddleware):
+    async def __call__(
+        self,
+        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+        event: Union[Message, CallbackQuery],
+        data: Dict[str, Any],
+    ) -> Any:
+        return await handler(event, data)
 
 
 async def download_file(url: str, destination_path: str, file_name: str) -> None:
@@ -88,8 +250,11 @@ async def command_start(message: types.Message) -> types.Message:
     :return: None
     """
     user_id = message.from_user.id
-    if str(user_id) not in os.listdir("../usr_files/"):
-        os.mkdir(f"../usr_files/{user_id}")
+    if "usr_files" not in os.listdir("."):
+        os.mkdir("usr_files")
+
+    if str(user_id) not in os.listdir("src/usr_files/"):
+        os.mkdir(f"src/usr_files/{user_id}")
     usr_lang[user_id] = "en"
 
     lang_markup = ReplyKeyboardBuilder()
@@ -226,7 +391,7 @@ async def get_new_file(message: types.Message, state: FSMContext):
     url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
     await download_file(
         url=url,
-        destination_path=f"../usr_files/{message.from_user.id}",
+        destination_path=f"src/usr_files/{message.from_user.id}",
         file_name=file_name,
     )
 
@@ -263,7 +428,7 @@ async def show_user_notebooks(
     usr_id = message.from_user.id
     files = [
         file
-        for file in os.listdir(f"../usr_files/{usr_id}/")
+        for file in os.listdir(f"src/usr_files/{usr_id}/")
         if not file.startswith(str(usr_id))
     ]
     if not files:
@@ -292,10 +457,10 @@ async def send_notebook(callback: types.CallbackQuery, state: FSMContext) -> Non
     :return:
     """
     await state.clear()
-    files = os.listdir(f"../usr_files/{callback.from_user.id}/")
+    files = os.listdir(f"src/usr_files/{callback.from_user.id}/")
     for file in files:
         if file.startswith(callback.data):
-            file_obj = FSInputFile(f"../usr_files/{callback.from_user.id}/{file}")
+            file_obj = FSInputFile(f"src/usr_files/{callback.from_user.id}/{file}")
             await SendDocument(chat_id=callback.message.chat.id, document=file_obj)
             break
 
@@ -317,7 +482,7 @@ async def changing_user_notebook(
     usr_id = message.from_user.id
     files = [
         file
-        for file in os.listdir(f"../usr_files/{usr_id}/")
+        for file in os.listdir(f"src/usr_files/{usr_id}/")
         if not file.startswith(str(usr_id))
     ]
     if not files:
@@ -391,7 +556,7 @@ async def get_files_to_update(message: types.Message, state: FSMContext) -> None
     url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
     await download_file(
         url=url,
-        destination_path=f"../usr_files/{message.from_user.id}",
+        destination_path=f"src/usr_files/{message.from_user.id}",
         file_name=file_name,
     )
 
@@ -408,3 +573,54 @@ async def make_changes(message: types.Message, state: FSMContext) -> None:
     await message.answer(text=f"Starting adding to {data['name']}")
 
     update_notebook(f'{data["name"]}', message.from_user.id)
+
+
+def register_user_commands(router: Router) -> None:
+    router.message.register(command_start, CommandStart())
+    router.message.register(command_help, Command(commands=["help"]))
+    router.message.register(choose_lang, F.text == "en")
+    router.message.register(choose_lang, F.text == "ru")
+    router.message.register(get_menu, F.text.lower() == "menu")
+
+    router.message.register(get_new_file_name, F.text == "Add new file")
+    router.message.register(add_new_file, AddingStates.waiting_for_name)
+    router.message.register(get_new_file, AddingStates.waiting_for_file)
+    router.message.register(create_new_notebook, AddingStates.creating_notebook)
+
+    router.message.register(show_user_notebooks, F.text == "Show my notebooks")
+    router.callback_query.register(send_notebook, ShowingStates.waiting_for_choose)
+
+    router.message.register(changing_user_notebook, F.text == "Change file")
+    router.message.register(get_change_to_notebook, ChangingStates.waiting_for_name)
+    router.message.register(get_files_to_update, ChangingStates.waiting_for_adding)
+    router.message.register(make_changes, ChangingStates.updating_notebook)
+
+    router.message.register(Simple_Middleware)
+    router.callback_query.register(Simple_Middleware)
+
+
+async def main():
+    logging.basicConfig(level=logging.DEBUG)
+
+    storage = MemoryStorage()
+    dp = Dispatcher(storage=storage)
+
+    bot = Bot(token=BOT_TOKEN)
+
+    register_user_commands(dp)
+
+    await bot.set_my_commands(
+        commands=[
+            BotCommand(command=cmd[0], description=cmd[1]) for cmd in bot_commands
+        ]
+    )
+
+    await dp.start_polling(bot, translator=Translator())
+
+
+def run_bot():
+    asyncio.run(main())
+
+
+if __name__ == "__main__":
+    run_bot()

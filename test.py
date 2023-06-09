@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from src.handlers.client import get_menu
+from src.main import get_menu
 
 
 @pytest.mark.asyncio
