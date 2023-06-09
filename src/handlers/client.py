@@ -10,7 +10,7 @@ from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from time import time
 import os
-from scripts.convert import make_notebook
+from scripts.convert import make_notebook, update_notebook
 
 from config import BOT_TOKEN
 
@@ -380,4 +380,4 @@ async def make_changes(message: types.Message, state: FSMContext) -> None:
 
     await message.answer(text=f"Starting adding to {data['name']}")
 
-    # make_notebook(f'{data["name"]}.pdf', message.from_user.id)
+    update_notebook(f'{data["name"]}', message.from_user.id)
