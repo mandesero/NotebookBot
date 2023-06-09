@@ -103,7 +103,7 @@ usr_lang = {}
 def image_to_pdf(path: str) -> None:
     """
 
-    :param path:
+    :param path: путь до картинки
     :return:
     """
     image = Image.open(path)
@@ -117,8 +117,8 @@ def image_to_pdf(path: str) -> None:
 def make_notebook(file_name: str, usr_id: int) -> None:
     """
 
-    :param file_name:
-    :param usr_id:
+    :param file_name: название итогового файла
+    :param usr_id: ID пользователя
     :return:
     """
     path = f"src/usr_files/{usr_id}/"
@@ -146,8 +146,8 @@ def make_notebook(file_name: str, usr_id: int) -> None:
 def update_notebook(file_name: str, usr_id: int) -> None:
     """
 
-    :param file_name:
-    :param usr_id:
+    :param file_name: название изменяемого файла
+    :param usr_id: ID пользователя
     :return:
     """
     path = f"src/usr_files/{usr_id}/"

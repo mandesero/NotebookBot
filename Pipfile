@@ -57,6 +57,9 @@ pillow = "*"
 pypdf2 = "*"
 pytest = "*"
 pytest-asyncio = "*"
+fluent = "*"
+fluent-compiler = "*"
+fluentogram = "*"
 
 [dev-packages]
 sphinx = "*"
