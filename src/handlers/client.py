@@ -16,7 +16,7 @@ from config import BOT_TOKEN
 
 import aiohttp
 
-from locale.translator import LocalizedTranslator, Translator
+from languages.translator import LocalizedTranslator, Translator
 
 usr_lang = {}
 
@@ -125,7 +125,7 @@ async def choose_lang(message: types.Message, translator: Translator) -> None:
     """
     Установка локали
 
-    :param message: locale ["ru" | "eng"]
+    :param message: languages ["ru" | "eng"]
     :return: None
     """
     trans = translator.get_translator(language=message.text.lower())

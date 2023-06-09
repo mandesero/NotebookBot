@@ -30,7 +30,7 @@ class Translator:
                     translator=FluentBundle.from_files(
                         locale="en-US",
                         filenames=[
-                            "../locale/locales/en.ftl",
+                            "../languages/locales/en.ftl",
                         ],
                     ),
                 ),
@@ -39,7 +39,7 @@ class Translator:
                     translator=FluentBundle.from_files(
                         locale="ru-RU",
                         filenames=[
-                            "../locale/locales/ru.ftl",
+                            "../languages/locales/ru.ftl",
                         ],
                     ),
                 ),

@@ -4,7 +4,7 @@ from typing import Callable, Dict, Any, Awaitable, Union
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
 
-from locale.translator import Translator
+from languages.translator import Translator
 
 
 class Simple_Middleware(BaseMiddleware):

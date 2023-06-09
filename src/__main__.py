@@ -6,7 +6,7 @@ from aiogram.types import BotCommand
 
 from config import BOT_TOKEN
 from handlers import register_user_commands, bot_commands
-from locale.translator import Translator
+from languages.translator import Translator
 
 
 async def main():
