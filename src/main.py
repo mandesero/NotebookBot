@@ -11,8 +11,6 @@ from fluentogram import TranslatorHub, FluentTranslator, TranslatorRunner
 from aiogram import Router, F
 from aiogram.filters import CommandStart, Command
 
-import asyncio
-
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -30,7 +28,6 @@ from typing import Callable, Dict, Any, Awaitable, Union
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
 
-import os
 from PIL import Image
 import PyPDF2
 import contextlib
