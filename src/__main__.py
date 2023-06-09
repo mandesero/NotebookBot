@@ -20,16 +20,15 @@ async def main():
     register_user_commands(dp)
 
     await bot.set_my_commands(
-        commands=[BotCommand(command=cmd[0], description=cmd[1]) for cmd in bot_commands]
+        commands=[
+            BotCommand(command=cmd[0], description=cmd[1]) for cmd in bot_commands
+        ]
     )
 
-    await dp.start_polling(
-        bot,
-        translator=Translator()
-    )
+    await dp.start_polling(bot, translator=Translator())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):

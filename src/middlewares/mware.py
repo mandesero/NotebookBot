@@ -12,7 +12,7 @@ class Simple_Middleware(BaseMiddleware):
         self,
         handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
         event: Union[Message, CallbackQuery],
-        data: Dict[str, Any]
+        data: Dict[str, Any],
     ) -> Any:
         # new_data = copy(data)
         # translator: Translator = new_data['translator']
