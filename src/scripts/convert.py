@@ -20,13 +20,13 @@ def make_notebook(file_name: str, usr_id: int) -> None:
     files = [path+file for file in os.listdir(path) if file.startswith(str(usr_id))]
     for f in files:
         if not f.endswith(".pdf"):
-            print(f)
+            #print(f)
             image_to_pdf(f)
             os.remove(f)
 
     pdf_files_list = [path+file for file in os.listdir(path) if file.startswith(str(usr_id))]
 
-    print(*pdf_files_list, sep='\n')
+    #print(*pdf_files_list, sep='\n')
 
     with contextlib.ExitStack() as stack:
         pdf_merger = PyPDF2.PdfMerger()
@@ -37,3 +37,28 @@ def make_notebook(file_name: str, usr_id: int) -> None:
             pdf_merger.write(f)
     for f in pdf_files_list:
         os.remove(f)
+
+
+def update_notebook(file_name: str, usr_id: int) -> None:
+    path = os.path.abspath(os.getcwd()) + '/' + f'../usr_files/{usr_id}/'
+    files = [path+file for file in os.listdir(path) if file.startswith(str(usr_id))]
+    for f in files:
+        if not f.endswith(".pdf"):
+            #print(f)
+            image_to_pdf(f)
+            os.remove(f)
+
+    pdf_files_list = [path+file for file in os.listdir(path) if file.startswith(str(usr_id))] + [path+file_name+'.pdf']
+
+    #print(*pdf_files_list, sep='\n')
+
+    with contextlib.ExitStack() as stack:
+        pdf_merger = PyPDF2.PdfMerger()
+        files = [stack.enter_context(open(pdf, 'rb')) for pdf in pdf_files_list]
+        for f in files:
+            pdf_merger.append(f)
+        with open(path+file_name+'.pdf', 'wb') as f:
+            pdf_merger.write(f)
+    for f in pdf_files_list:
+        if f != path+file_name+'.pdf':
+            os.remove(f)
