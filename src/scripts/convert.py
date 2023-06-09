@@ -6,30 +6,25 @@ import contextlib
 
 # path to file
 def image_to_pdf(path: str) -> None:
-    if not os.path.exists(path):
-        print("poshel nahui")
-        return
-
     image = Image.open(path)
     image = image.convert('RGB')
-    idx = path.find('.')
-    if (idx := path.find('.')) != -1:
+    if (idx := path.rfind('.'), -5) != -1:
         path = path[:idx]
     path += '.pdf'
+    print(path)
     image.save(path)
 
 
-# path to folder
-def merge_pdf(path: str) -> None:
-    if not os.path.exists(path):
-        print("poshel nahui")
-        return
+def make_notebook(file_name: str, usr_id: int) -> None:
+    path = os.path.abspath(os.getcwd()) + '/' + f'../usr_files/{usr_id}/'
+    files = [path+file for file in os.listdir(path) if file.startswith(str(usr_id))]
+    for f in files:
+        if not f.endswith(".pdf"):
+            print(f)
+            image_to_pdf(f)
+            os.remove(f)
 
-    pdf_files_list = []
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if (file.endswith(".pdf")):
-                pdf_files_list.append(os.path.join(root, file))
+    pdf_files_list = [path+file for file in os.listdir(path) if file.startswith(str(usr_id))]
 
     print(*pdf_files_list, sep='\n')
 
@@ -38,18 +33,7 @@ def merge_pdf(path: str) -> None:
         files = [stack.enter_context(open(pdf, 'rb')) for pdf in pdf_files_list]
         for f in files:
             pdf_merger.append(f)
-        with open(pdf_files_list[0][:-4] + '_merged.pdf', 'wb') as f:
+        with open(path+file_name+'.pdf', 'wb') as f:
             pdf_merger.write(f)
-
-
-def make_notebook(file_name: str, usr_id: int) -> None:
-    # files = [file for file in os.listdir(f'../usr_files/{usr_id}/') if file.startswith(str(usr_id))]
-    # нужно сделать сбор всех файлов из директории usr_id, которые начинаются на usr_id в один пдф и сохранить его с именем file_name
-    pass
-
-inp = input()
-path = input()
-if inp == 'new':
-    image_to_pdf(path)
-else:
-    merge_pdf(path)
+    for f in pdf_files_list:
+        os.remove(f)

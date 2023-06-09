@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -8,6 +10,7 @@ from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from time import time
 import os
+from scripts.convert import make_notebook
 
 from config import BOT_TOKEN
 
@@ -162,6 +165,8 @@ async def get_new_file(message: types.Message, state: FSMContext):
 
     if message.text:
         await state.set_state(AddingStates.creating_notebook)
+        await message.answer(text="Waiting...")
+        await asyncio.sleep(20)
         return await create_new_notebook(message, state)
 
     if message.document:
@@ -185,7 +190,9 @@ async def create_new_notebook(message: types.Message, state: FSMContext) -> None
         text=f"Making {data['name']}..."
     )
 
-    # Объединение всех файлов в data['name'].pdf, очистка мусора
+    make_notebook(f'{data["name"]}', message.from_user.id)
+    await state.clear()
+    await message.answer(text=f"{data['name']} complete")
 
 
 # ========================== Show user files ==========================
@@ -288,4 +295,4 @@ async def make_changes(message: types.Message, state: FSMContext) -> None:
 
     await message.answer(text=f"Starting adding to {data['name']}")
 
-    # Добавление всех файлов в data['name'].pdf, очистка мусора
+    # make_notebook(f'{data["name"]}.pdf', message.from_user.id)

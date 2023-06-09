@@ -53,6 +53,8 @@ typing-extensions = "==4.5.0"
 urllib3 = "==1.26.15"
 wrapt = "==1.15.0"
 yarl = "==1.8.2"
+pillow = "*"
+pypdf2 = "*"
 
 [dev-packages]
 sphinx = "*"
