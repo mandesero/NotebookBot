@@ -18,8 +18,17 @@ import aiohttp
 
 from locale.translator import LocalizedTranslator, Translator
 
+usr_lang = {}
+
 
 async def download_file(url: str, destination_path: str, file_name: str) -> None:
+    '''
+    Скачивание пользовательских файлов
+    :param url: (str)
+    :param destination_path: (str)
+    :param file_name:  (str)
+    :return:
+    '''
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             data = await response.read()
@@ -44,10 +53,16 @@ class AddingStates(StatesGroup):
 
 
 class ShowingStates(StatesGroup):
+    '''
+        ShowingStates
+    '''
     waiting_for_choose = State()
 
 
 class ChangingStates(StatesGroup):
+    '''
+        ChangingStates
+    '''
     waiting_for_name = State()
     waiting_for_adding = State()
     updating_notebook = State()
@@ -55,7 +70,7 @@ class ChangingStates(StatesGroup):
 
 async def command_start(message: types.Message) -> None:
     """
-    Start messaging with bot. Ability to set locale.
+    Начало работы с ботом. Выбор локали
 
     :param message: command "/start"
     :return: None
@@ -63,6 +78,7 @@ async def command_start(message: types.Message) -> None:
     user_id = message.from_user.id
     if str(user_id) not in os.listdir("../usr_files/"):
         os.mkdir(f"../usr_files/{user_id}")
+    usr_lang[user_id] = 'en'
 
     lang_markup = ReplyKeyboardBuilder()
     lang_markup.button(text="ru", callback_data="ru")
@@ -80,7 +96,7 @@ async def command_start(message: types.Message) -> None:
 
 async def command_help(message: types.Message, command: CommandObject) -> types.Message:
     """
-    Command for get some help.
+    Получение справки по доступным командам
 
     :param message: command "/help"
     :return: description of the command
@@ -98,13 +114,14 @@ async def command_help(message: types.Message, command: CommandObject) -> types.
 
 async def choose_lang(message: types.Message, translator: Translator) -> None:
     """
-    Set up user locale.
+    Установка локали
 
     :param message: locale ["ru" | "eng"]
     :return: None
     """
     trans = translator.get_translator(language=message.text.lower())
     t = trans.get('test')
+    usr_lang[message.from_user.id] = message.text.lower()
     await message.answer(text=f"{t} + You choose {message.text}")
 
 
@@ -124,6 +141,12 @@ async def get_menu(message: types.Message) -> None:
 
 
 async def get_new_file_name(message: types.Message, state: FSMContext) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :return:
+    '''
     await state.set_state(AddingStates.waiting_for_name)
 
     cancel_board = ReplyKeyboardBuilder()
@@ -138,7 +161,14 @@ async def get_new_file_name(message: types.Message, state: FSMContext) -> None:
     )
 
 
-async def add_new_file(message: types.Message, state: FSMContext) -> None:
+async def add_new_file(message: types.Message, state: FSMContext, translator: Translator) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :param translator:
+    :return:
+    '''
     if message.text == "Cancel":
         await state.clear()
         return
@@ -148,9 +178,9 @@ async def add_new_file(message: types.Message, state: FSMContext) -> None:
 
     cancel_board = ReplyKeyboardBuilder()
     cancel_board.button(text="Cancel")
-
+    trans = translator.get_translator(language=usr_lang[message.from_user.id])
     await message.answer(
-        "Upload your files (Write 'done' in the end)",
+        text=trans.get('upload'),
         reply_markup=cancel_board.as_markup(
             resize_keyboard=True,
             one_time_keyboard=True
@@ -159,6 +189,12 @@ async def add_new_file(message: types.Message, state: FSMContext) -> None:
 
 
 async def get_new_file(message: types.Message, state: FSMContext):
+    '''
+
+    :param message:
+    :param state:
+    :return:
+    '''
     if message.text and message.text == "Cancel":
         await state.clear()
         return
@@ -184,6 +220,12 @@ async def get_new_file(message: types.Message, state: FSMContext):
 
 
 async def create_new_notebook(message: types.Message, state: FSMContext) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :return:
+    '''
     data = await state.get_data()
     print(data)
     await message.answer(
@@ -197,7 +239,14 @@ async def create_new_notebook(message: types.Message, state: FSMContext) -> None
 
 # ========================== Show user files ==========================
 
-async def show_user_notebooks(message: types.Message, state: FSMContext) -> None:
+async def show_user_notebooks(message: types.Message, state: FSMContext, translator: Translator) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :param translator:
+    :return:
+    '''
     usr_id = message.from_user.id
     files = [file for file in os.listdir(f'../usr_files/{usr_id}/') if not file.startswith(str(usr_id))]
     if not files:
@@ -209,8 +258,9 @@ async def show_user_notebooks(message: types.Message, state: FSMContext) -> None
         file_name = file.split('.')[0]
         notebooks_markup.button(text=file_name, callback_data=f"{file_name}")
     notebooks_markup.adjust(1)
+    trans = translator.get_translator(language=usr_lang[message.from_user.id])
     await message.answer(
-        text='Your notebooks:', # переводим
+        text=trans.get('yournotebooks'),
         reply_markup=notebooks_markup.as_markup(
             resize_keyboard=True,
             one_time_keyboard=True
@@ -219,6 +269,12 @@ async def show_user_notebooks(message: types.Message, state: FSMContext) -> None
 
 
 async def send_notebook(callback: types.CallbackQuery, state: FSMContext) -> None:
+    '''
+
+    :param callback:
+    :param state:
+    :return:
+    '''
     await state.clear()
     files = os.listdir(f'../usr_files/{callback.from_user.id}/')
     for file in files:
@@ -230,7 +286,14 @@ async def send_notebook(callback: types.CallbackQuery, state: FSMContext) -> Non
 
 # ========================== Changing user files ==========================
 
-async def changing_user_notebook(message: types.Message, state: FSMContext) -> None:
+async def changing_user_notebook(message: types.Message, state: FSMContext, translator: Translator) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :param translator:
+    :return:
+    '''
     await state.set_state(ChangingStates.waiting_for_name)
     usr_id = message.from_user.id
     files = [file for file in os.listdir(f'../usr_files/{usr_id}/') if not file.startswith(str(usr_id))]
@@ -242,8 +305,9 @@ async def changing_user_notebook(message: types.Message, state: FSMContext) -> N
         file_name = file.split('.')[0]
         notebooks_markup.button(text=file_name, callback_data=f"file_{file_name}")
     notebooks_markup.adjust(1)
+    trans = translator.get_translator(language=usr_lang[message.from_user.id])
     await message.answer(
-        text='Choose notebook which you want to change:',
+        text=trans.get('choose'),
         reply_markup=notebooks_markup.as_markup(
             resize_keyboard=True,
             one_time_keyboard=True
@@ -251,15 +315,22 @@ async def changing_user_notebook(message: types.Message, state: FSMContext) -> N
     )
 
 
-async def get_change_to_notebook(message: types.Message, state: FSMContext) -> None:
+async def get_change_to_notebook(message: types.Message, state: FSMContext, translator: Translator) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :param translator:
+    :return:
+    '''
     await state.update_data(name=message.text)
     await state.set_state(ChangingStates.waiting_for_adding)
 
     cancel_board = ReplyKeyboardBuilder()
     cancel_board.button(text="Cancel")
-
+    trans = translator.get_translator(language=usr_lang[message.from_user.id])
     await message.answer(
-        text="Upload your files (Write 'done' in the end)",
+        text=trans.get('upload'),
         reply_markup=cancel_board.as_markup(
             resize_keyboard=True,
             one_time_keyboard=True
@@ -268,12 +339,20 @@ async def get_change_to_notebook(message: types.Message, state: FSMContext) -> N
 
 
 async def get_files_to_update(message: types.Message, state: FSMContext) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :return:
+    '''
     if message.text and message.text == "Cancel":
         await state.clear()
         return
 
     if message.text and message.text.lower() == "done":
         await state.set_state(ChangingStates.updating_notebook)
+        await message.answer(text="Waiting...")
+        await asyncio.sleep(20)
         return await make_changes(message, state)
 
     if message.document:
@@ -291,6 +370,12 @@ async def get_files_to_update(message: types.Message, state: FSMContext) -> None
 
 
 async def make_changes(message: types.Message, state: FSMContext) -> None:
+    '''
+
+    :param message:
+    :param state:
+    :return:
+    '''
     data = await state.get_data()
 
     await message.answer(text=f"Starting adding to {data['name']}")
