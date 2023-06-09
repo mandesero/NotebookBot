@@ -14,7 +14,6 @@ from handlers.client import (
     changing_user_notebook, get_change_to_notebook,
     get_files_to_update, make_changes
 )
-from callback_data.callback_data import MenuCallbackData
 
 
 def register_user_commands(router: Router) -> None:
@@ -30,7 +29,7 @@ def register_user_commands(router: Router) -> None:
     router.message.register(create_new_notebook, AddingStates.creating_notebook)
 
     router.message.register(show_user_notebooks, F.text == "Show my notebooks")
-    router.message.register(send_notebook, ShowingStates.waiting_for_choose)
+    router.callback_query.register(send_notebook, ShowingStates.waiting_for_choose)
 
     router.message.register(changing_user_notebook, F.text == "Change file")
     router.message.register(get_change_to_notebook, ChangingStates.waiting_for_name)

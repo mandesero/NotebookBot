@@ -11,7 +11,6 @@ import os
 
 from config import BOT_TOKEN
 
-from keyboards.client_kb import lang_markup, menu_markup
 import aiohttp
 
 
@@ -59,6 +58,11 @@ async def command_start(message: types.Message) -> None:
     user_id = message.from_user.id
     if str(user_id) not in os.listdir("../usr_files/"):
         os.mkdir(f"../usr_files/{user_id}")
+
+    lang_markup = ReplyKeyboardBuilder()
+    lang_markup.button(text="ru", callback_data="ru")
+    lang_markup.button(text="eng", callback_data="eng")
+    lang_markup.adjust(2)
 
     await message.answer(
         "Hello",
@@ -189,13 +193,13 @@ async def show_user_notebooks(message: types.Message, state: FSMContext) -> None
         await state.clear()
         return
     await state.set_state(ShowingStates.waiting_for_choose)
-    notebooks_markup = ReplyKeyboardBuilder()
+    notebooks_markup = InlineKeyboardBuilder()
     for file in files:
         file_name = file.split('.')[0]
-        notebooks_markup.button(text=file_name, callback_data=f"file_{file_name}")
+        notebooks_markup.button(text=file_name, callback_data=f"{file_name}")
     notebooks_markup.adjust(1)
     await message.answer(
-        text='Your notebooks:',
+        text='Your notebooks:', # переводим
         reply_markup=notebooks_markup.as_markup(
             resize_keyboard=True,
             one_time_keyboard=True
@@ -203,13 +207,14 @@ async def show_user_notebooks(message: types.Message, state: FSMContext) -> None
     )
 
 
-async def send_notebook(message: types.Message, state: FSMContext) -> None:
+async def send_notebook(callback: types.CallbackQuery, state: FSMContext) -> None:
     await state.clear()
-    files = os.listdir(f'../usr_files/{message.from_user.id}/')
+    files = os.listdir(f'../usr_files/{callback.from_user.id}/')
     for file in files:
-        if file.startswith(message.text):
-            file_obj = FSInputFile(f'../usr_files/{message.from_user.id}/{file}')
-            await SendDocument(chat_id=message.chat.id, document=file_obj)
+        if file.startswith(callback.data):
+            file_obj = FSInputFile(f'../usr_files/{callback.from_user.id}/{file}')
+            await SendDocument(chat_id=callback.message.chat.id, document=file_obj)
+            break
 
 
 # ========================== Changing user files ==========================
@@ -276,6 +281,7 @@ async def get_files_to_update(message: types.Message, state: FSMContext) -> None
 
 async def make_changes(message: types.Message, state: FSMContext) -> None:
     data = await state.get_data()
+
     await message.answer(text=f"Starting adding to {data['name']}")
 
     # Добавление всех файлов в data['name'].pdf, очистка мусора
