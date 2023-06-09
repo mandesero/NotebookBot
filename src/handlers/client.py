@@ -13,6 +13,8 @@ from config import BOT_TOKEN
 
 import aiohttp
 
+from locale.translator import LocalizedTranslator, Translator
+
 
 async def download_file(url: str, destination_path: str, file_name: str) -> None:
     async with aiohttp.ClientSession() as session:
@@ -61,7 +63,7 @@ async def command_start(message: types.Message) -> None:
 
     lang_markup = ReplyKeyboardBuilder()
     lang_markup.button(text="ru", callback_data="ru")
-    lang_markup.button(text="eng", callback_data="eng")
+    lang_markup.button(text="en", callback_data="en")
     lang_markup.adjust(2)
 
     await message.answer(
@@ -91,14 +93,16 @@ async def command_help(message: types.Message, command: CommandObject) -> types.
     )
 
 
-async def choose_lang(message: types.Message) -> None:
+async def choose_lang(message: types.Message, translator: Translator) -> None:
     """
     Set up user locale.
 
     :param message: locale ["ru" | "eng"]
     :return: None
     """
-    await message.answer(text=f"You choose {message.text}")
+    trans = translator.get_translator(language=message.text.lower())
+    t = trans.get('test')
+    await message.answer(text=f"{t} + You choose {message.text}")
 
 
 async def get_menu(message: types.Message) -> None:

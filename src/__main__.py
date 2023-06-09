@@ -6,6 +6,7 @@ from aiogram.types import BotCommand
 
 from config import BOT_TOKEN
 from handlers import register_user_commands, bot_commands
+from locale.translator import Translator
 
 
 async def main():
@@ -13,6 +14,7 @@ async def main():
 
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
+
     bot = Bot(token=BOT_TOKEN)
 
     register_user_commands(dp)
@@ -21,7 +23,10 @@ async def main():
         commands=[BotCommand(command=cmd[0], description=cmd[1]) for cmd in bot_commands]
     )
 
-    await dp.start_polling(bot)
+    await dp.start_polling(
+        bot,
+        translator=Translator()
+    )
 
 
 if __name__ == '__main__':

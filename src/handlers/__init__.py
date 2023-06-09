@@ -14,13 +14,14 @@ from handlers.client import (
     changing_user_notebook, get_change_to_notebook,
     get_files_to_update, make_changes
 )
+from middlewares.mware import Simple_Middleware
 
 
 def register_user_commands(router: Router) -> None:
     router.message.register(command_start, CommandStart())
     router.message.register(command_help, Command(commands=['help']))
+    router.message.register(choose_lang, F.text == "en")
     router.message.register(choose_lang, F.text == "ru")
-    router.message.register(choose_lang, F.text == "eng")
     router.message.register(get_menu, F.text.lower() == 'menu')
 
     router.message.register(get_new_file_name, F.text == "Add new file")
@@ -35,3 +36,6 @@ def register_user_commands(router: Router) -> None:
     router.message.register(get_change_to_notebook, ChangingStates.waiting_for_name)
     router.message.register(get_files_to_update, ChangingStates.waiting_for_adding)
     router.message.register(make_changes, ChangingStates.updating_notebook)
+
+    router.message.register(Simple_Middleware)
+    router.callback_query.register(Simple_Middleware)
