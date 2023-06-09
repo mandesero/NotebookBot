@@ -55,6 +55,8 @@ wrapt = "==1.15.0"
 yarl = "==1.8.2"
 pillow = "*"
 pypdf2 = "*"
+pytest = "*"
+pytest-asyncio = "*"
 
 [dev-packages]
 sphinx = "*"

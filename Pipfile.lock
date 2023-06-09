@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f6b5f44e67d11b1c0b86178a94825efd2f85338b7299872e2574ba4a60799be9"
+            "sha256": "6cf396e4df9b5ddffb646a3e820f8b29285f0c025e85149e99667f2842ee103b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -317,6 +317,14 @@
             "index": "pypi",
             "version": "==0.19"
         },
+        "exceptiongroup": {
+            "hashes": [
+                "sha256:232c37c63e4f682982c8b6459f33a8981039e5fb8756b2074364e5055c498c9e",
+                "sha256:d484c3090ba2889ae2928419117447a14daf3c1231d5e30d0aae34f354f01785"
+            ],
+            "markers": "python_version < '3.11'",
+            "version": "==1.1.1"
+        },
         "frozenlist": {
             "hashes": [
                 "sha256:008a054b75d77c995ea26629ab3a0c0d7281341f2fa7e1e85fa6153ae29ae99c",
@@ -412,6 +420,14 @@
             ],
             "index": "pypi",
             "version": "==1.4.1"
+        },
+        "iniconfig": {
+            "hashes": [
+                "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3",
+                "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==2.0.0"
         },
         "isort": {
             "hashes": [
@@ -727,6 +743,14 @@
             "index": "pypi",
             "version": "==3.2.0"
         },
+        "pluggy": {
+            "hashes": [
+                "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159",
+                "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==1.0.0"
+        },
         "pydantic": {
             "hashes": [
                 "sha256:01aea3a42c13f2602b7ecbbea484a98169fb568ebd9e247593ea05f01b884b2e",
@@ -792,6 +816,22 @@
             ],
             "index": "pypi",
             "version": "==3.0.1"
+        },
+        "pytest": {
+            "hashes": [
+                "sha256:3799fa815351fea3a5e96ac7e503a96fa51cc9942c3753cda7651b93c1cfa362",
+                "sha256:434afafd78b1d78ed0addf160ad2b77a30d35d4bdf8af234fe621919d9ed15e3"
+            ],
+            "index": "pypi",
+            "version": "==7.3.1"
+        },
+        "pytest-asyncio": {
+            "hashes": [
+                "sha256:2b38a496aef56f56b0e87557ec313e11e1ab9276fc3863f6a7be0f1d0e415e1b",
+                "sha256:f2b3366b7cd501a4056858bd39349d5af19742aed2d81660b7998b6341c7eb9c"
+            ],
+            "index": "pypi",
+            "version": "==0.21.0"
         },
         "python-dotenv": {
             "hashes": [
@@ -1510,6 +1550,14 @@
             "index": "pypi",
             "version": "==1.1.5"
         },
+        "tomli": {
+            "hashes": [
+                "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
+                "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"
+            ],
+            "index": "pypi",
+            "version": "==2.0.1"
+        },
         "tomlkit": {
             "hashes": [
                 "sha256:5325463a7da2ef0c6bbfefb62a3dc883aebe679984709aee32a317907d0a8d3c",
@@ -1517,6 +1565,14 @@
             ],
             "index": "pypi",
             "version": "==0.11.7"
+        },
+        "typing-extensions": {
+            "hashes": [
+                "sha256:5cb5f4a79139d699607b3ef622a1dedafa84e115ab0024e0d9c044a9479ca7cb",
+                "sha256:fb33085c39dd998ac16d1431ebc293a8b3eedd00fd4a32de0ff79002c19511b4"
+            ],
+            "index": "pypi",
+            "version": "==4.5.0"
         },
         "urllib3": {
             "hashes": [
