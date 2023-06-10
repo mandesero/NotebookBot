@@ -62,6 +62,7 @@ fluent-compiler = "*"
 fluentogram = "*"
 doit = "*"
 build = "*"
+flake8 = "*"
 
 [dev-packages]
 sphinx = "*"

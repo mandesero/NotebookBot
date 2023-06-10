@@ -3,3 +3,9 @@
 /docs/_build
 /src/.env
 /usr_files/*
+/dist
+/NotebookBot.egg-info
+/build
+/.idea
+/.pytest_cache
+/.doit.db
