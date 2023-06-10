@@ -60,12 +60,15 @@ pytest-asyncio = "*"
 fluent = "*"
 fluent-compiler = "*"
 fluentogram = "*"
+doit = "*"
+build = "*"
 
 [dev-packages]
 sphinx = "*"
 pylint = "*"
 babel = "*"
 black = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3.11"
